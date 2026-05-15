@@ -1,7 +1,33 @@
+import { useState } from "react";
 import { TextField, Button, Typography, Box, Link } from "@mui/material";
 import "../../../index.css";
 
-const FormLogin = ({ isTablet }) => {
+const FormLogin = ({ isTablet, onSubmit, loading }) => {
+
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleSubmit = () => {
+
+        const payload = {
+            username: username.trim(),
+            password: password
+        };
+
+        if (!payload.username || !payload.password) {
+            //console.log("Campos vacíos");
+            return;
+        }
+
+        //console.log("Enviando:", payload);
+
+        if (onSubmit) {
+            onSubmit(payload);
+        } else {
+            //console.log(" onSubmit no definido");
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -47,6 +73,8 @@ const FormLogin = ({ isTablet }) => {
                     variant="outlined"
                     fullWidth
                     size={isTablet ? "small" : "medium"}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     sx={{
                         "& .MuiInputBase-input": {
                             color: "var(--text-color)",
@@ -68,6 +96,8 @@ const FormLogin = ({ isTablet }) => {
                     variant="outlined"
                     fullWidth
                     size={isTablet ? "small" : "medium"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     sx={{
                         "& .MuiInputBase-input": {
                             color: "var(--text-color)",
@@ -101,6 +131,8 @@ const FormLogin = ({ isTablet }) => {
                     variant="contained"
                     fullWidth
                     size="large"
+                    onClick={handleSubmit}
+                    disabled={loading}
                     sx={{
                         backgroundColor: "var(--primary-color)",
                         "&:hover": {
@@ -114,7 +146,7 @@ const FormLogin = ({ isTablet }) => {
                         mt: isTablet ? 2 : 4,
                     }}
                 >
-                    Iniciar
+                    {loading ? "Ingresando..." : "Iniciar"}
                 </Button>
             </Box>
         </Box>

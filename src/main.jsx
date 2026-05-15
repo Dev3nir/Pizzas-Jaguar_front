@@ -10,12 +10,15 @@ const root = document.getElementById("root");
 import Example from "./pages/Example.page.jsx";
 
 import LoginPage from "./pages/Login.page.jsx";
+import Menu from "./pages/Menu.jsx";
+
 
 ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Example />} />
+     
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/menu" element={<Menu />} />
      
     </Routes>
   </BrowserRouter>,
