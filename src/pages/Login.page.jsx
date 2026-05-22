@@ -11,7 +11,7 @@ import ImageLogin from "../components/ui/Login/Image.login";
 
 import imagen from "../assets/img_login.png";
 import Logo from "../assets/logos/logo.png";
-import BACKEND_URL from "../config/backend.js";
+import API_URL from "../config/backend.js";
 
 const { Header, Content } = Layout;
 
@@ -45,7 +45,7 @@ const LoginPage = () => {
     try {
       setLoading(true);
 
-      const url = `${BACKEND_URL}/api/v1/login`;
+      const url = `${API_URL}/login`;
 
       const res = await fetch(url, {
         method: "POST",
