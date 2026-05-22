@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Layout } from "antd";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
+import Swal from "sweetalert2";
 
 import HeaderLogin from "../components/ui/Login/Header.login";
 import FormLogin from "../components/ui/Login/Form.login";
@@ -8,6 +11,7 @@ import ImageLogin from "../components/ui/Login/Image.login";
 
 import imagen from "../assets/img_login.png";
 import Logo from "../assets/logos/logo.png";
+import API_URL from "../config/backend.js";
 
 const { Header, Content } = Layout;
 
@@ -29,8 +33,71 @@ const useResponsive = () => {
 };
 
 const LoginPage = () => {
+
   const isTablet = useResponsive();
   const headerHeight = isTablet ? "70px" : "90px";
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (values) => {
+    if (!values) return;
+
+    try {
+      setLoading(true);
+
+      const url = `${API_URL}/login`;
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(values)
+      });
+
+      const data = await res.json();
+
+      console.log("RESPONSE:", data);
+
+      if (!res.ok) {
+
+        Swal.fire({
+          icon: "error",
+          title: "Error de autenticación",
+          text: data.message === "Contraseña incorrecta"
+            ? "Contraseña incorrecta"
+            : data.message || "Error de login"
+        });
+
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+
+      Swal.fire({
+        icon: "success",
+        title: "Login exitoso",
+        text: "Accediendo al panel...",
+        timer: 1200,
+        showConfirmButton: false
+      });
+
+      navigate("/admin/panel");
+
+    } catch (error) {
+
+      console.log("ERROR LOGIN:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error de conexión",
+        text: "No se pudo conectar al servidor"
+      });
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Layout
@@ -53,7 +120,6 @@ const LoginPage = () => {
           alignItems: isTablet ? "start" : "center",
           padding: isTablet ? "16px" : "32px",
           height: `calc(100vh - ${headerHeight})`,
-          backgroundColor: "var(--background-color)",
         }}
       >
         <div
@@ -63,59 +129,18 @@ const LoginPage = () => {
             display: "flex",
             gap: isTablet ? "20px" : "40px",
             height: isTablet ? "80%" : "70vh",
-            maxHeight: "800px",
-            backgroundColor: "transparent",
           }}
         >
-          <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "start",
-              backgroundColor: "transparent",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: isTablet ? "100%" : "700px",
-                height: "100%",
-                display: "flex",
-                alignContent: "start",
-                justifyContent: "end",
-                backgroundColor: "transparent",
-              }}
-            >
-              <FormLogin isTablet={isTablet} />
-            </div>
+          <motion.div style={{ flex: 1, display: "flex" }}>
+            <FormLogin
+              isTablet={isTablet}
+              onSubmit={handleLogin}
+              loading={loading}
+            />
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "stretch",
-              backgroundColor: "transparent",
-            }}
-            className="image-section"
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "800px",
-                height: "100%",
-              }}
-            >
-              <ImageLogin image={imagen} />
-            </div>
+          <motion.div style={{ flex: 1, display: "flex" }}>
+            <ImageLogin image={imagen} />
           </motion.div>
         </div>
       </Content>

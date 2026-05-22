@@ -14,10 +14,13 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.0.0",
     "antd": "^6.3.7",
+    "axios": "^1.16.1",
     "motion": "^12.38.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-router-dom": "^7.14.2"
+    "react-router-dom": "^7.14.2",
+    "socket.io-client": "^4.8.3",
+    "sweetalert2": "^11.26.24"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
