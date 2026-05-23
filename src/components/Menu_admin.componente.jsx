@@ -9,7 +9,7 @@ const MenuAdmin = () => {
 
   const items = [
     {
-      key: "/admin/inicio",
+      key: "/admin/",
       label: "Inicio"
     },
     {

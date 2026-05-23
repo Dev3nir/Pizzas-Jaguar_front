@@ -7,7 +7,8 @@ import Logo from "../../assets/logos/logo.png";
 
 // Importaciones de Ant Design
 import { Button } from "antd";
-import { MoneyCollectOutlined, ShopOutlined, InboxOutlined } from "@ant-design/icons";
+import { MoneyCollectOutlined, ShopOutlined, InboxOutlined, DollarOutlined } from "@ant-design/icons";
+import { flex, maxWidth, width } from "@mui/system";
 
 const InicioAdmin = () => {
     // Variables
@@ -58,7 +59,8 @@ const InicioAdmin = () => {
             flexDirection: "column", // Primero el Header, luego el resto
             width: "100vw",
             height: "100vh",
-            backgroundColor: "#f9f9f6", // Fondo claro como en la imagen
+            backgroundColor: "#f9f9f6",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         }}>
             <HeaderComponent
                 text="ADMINISTRADOR" 
@@ -76,7 +78,7 @@ const InicioAdmin = () => {
                 {/* Contenido Principal */}
                 <div style={{ flex: 1, padding: "40px 60px", overflowY: "auto" }}>
                     
-                    <h1 style={{ color: "#333", fontSize: "28px", fontWeight: "bold" }}>
+                    <h1 style={{ color: "#333", fontSize: "42px", fontWeight: "bold" }}>
                         Buenas tardes, Alex!
                     </h1>
 
@@ -88,10 +90,10 @@ const InicioAdmin = () => {
                                 borderRadius: "100px", 
                                 borderColor: "#5A9BD5", 
                                 color: "#5A9BD5", 
-                                width: "300px", 
-                                height: "100px",
+                                width: "400px", 
+                                height: "70px",
                                 fontWeight: "bold", 
-                                fontSize: "24px",
+                                fontSize: "26px",
                                 marginRight: "25px"
                             }}
                         >
@@ -103,10 +105,10 @@ const InicioAdmin = () => {
                                 borderRadius: "100px", 
                                 borderColor: "#D0021B", 
                                 color: "#D0021B", 
-                                width: "300px", 
-                                height: "100px",
+                                width: "400px", 
+                                height: "70px",
                                 fontWeight: "bold", 
-                                fontSize: "24px"
+                                fontSize: "26px"
                             }}
                         >
                             Cerrar caja
@@ -114,36 +116,36 @@ const InicioAdmin = () => {
                     </div>
 
                     {/* Título Resumen */}
-                    <h2 style={{ fontSize: "22px", color: "#555", marginBottom: "20px" }}>Resumen</h2>
+                    <h2 style={{ fontSize: "32px", color: "#717070", marginBottom: "30px" }}>Resumen</h2>
 
                     {/* Contenedor de Tarjetas (Cards) */}
-                    <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", justifyContent: "center", gap: "80px", flexWrap: "wrap", width: "100%" }}>
                         
                         {/* Tarjeta 24h */}
                         <div style={cardStyle("#65D26E")}>
-                            <MoneyCollectOutlined style={{ fontSize: "35px", marginBottom: "15px" }} />
-                            <h2 style={{ fontSize: "36px", margin: "0", color: "#fff", fontWeight: "bold" }}>
+                            <DollarOutlined style={{ fontSize: "95px", marginBottom: "25px" }} />
+                            <h2 style={{ fontSize: "36px", margin: "0", color: "#fff", fontWeight: "bold", marginBottom: "25px" }}>
                                 ${ventasHoy}
                             </h2>
-                            <p style={{ margin: "5px 0 0 0", fontSize: "16px" }}>Ventas en las últimas 24h</p>
+                            <p style={{ margin: "5px 0 0 0", fontSize: "23px", color: "#d2ffd5" }}>Ventas en las últimas 24h</p>
                         </div>
 
                         {/* Tarjeta Mes */}
                         <div style={cardStyle("#52C4A5")}>
-                            <ShopOutlined style={{ fontSize: "35px", marginBottom: "15px" }} />
-                            <h2 style={{ fontSize: "36px", margin: "0", color: "#fff", fontWeight: "bold" }}>
+                            <ShopOutlined style={{ fontSize: "95px", marginBottom: "25px" }} />
+                            <h2 style={{ fontSize: "36px", margin: "0", color: "#fff", fontWeight: "bold", marginBottom: "25px" }}>
                                 ${ventasMes}
                             </h2>
-                            <p style={{ margin: "5px 0 0 0", fontSize: "16px" }}>Ventas del mes</p>
+                            <p style={{ margin: "5px 0 0 0", fontSize: "23px", color: "#c1ffee" }}>Ventas del mes</p>
                         </div>
 
                         {/* Tarjeta Producto */}
                         <div style={cardStyle("#5A9BD5")}>
-                            <InboxOutlined style={{ fontSize: "35px", marginBottom: "15px" }} />
-                            <h2 style={{ fontSize: "28px", margin: "0", color: "#fff", fontWeight: "bold", lineHeight: "1.2" }}>
+                            <InboxOutlined style={{ fontSize: "95px", marginBottom: "25px" }} />
+                            <h2 style={{ fontSize: "28px", margin: "0", color: "#fff", fontWeight: "bold", lineHeight: "1.2", marginBottom: "25px" }}>
                                 {productovendido}
                             </h2>
-                            <p style={{ margin: "10px 0 0 0", fontSize: "16px" }}>Producto más vendido</p>
+                            <p style={{ margin: "10px 0 0 0", fontSize: "23px", color: "#c2e3ff" }}>Producto más vendido</p>
                         </div>
 
                     </div>
@@ -157,10 +159,13 @@ const InicioAdmin = () => {
 const cardStyle = (bgColor) => ({
     backgroundColor: bgColor,
     color: "white",
-    borderRadius: "16px",
+    borderRadius: "40px",
     padding: "30px 20px",
     flex: "1",
-    minWidth: "200px",
+    width: "240px",
+    minWidth: "240px",
+    maxWidth: "240px",
+    height: "250px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

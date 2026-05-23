@@ -27,7 +27,8 @@ const HeaderComponent = ({ text, logo, height = "80px", isTablet }) => {
           display: "flex",
           alignItems: "center",
           fontWeight: 700,
-          letterSpacing: "1px",
+          fontSize: "30px",
+          letterSpacing: "2px",
           textTransform: "uppercase" 
         }}
       >
