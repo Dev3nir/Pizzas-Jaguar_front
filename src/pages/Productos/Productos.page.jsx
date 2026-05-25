@@ -16,7 +16,7 @@ const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
 // DATOS SIMULADOS PARA LOS SELECTS DEL MODAL (Mantenemos tamaños)
-const mockTamanos = ["Chico", "Mediano", "Grande", "Jumbo", "600 ml"];
+const mockTamanos = ["Chico", "Mediano", "Grande", "Jumbo", "600 ml", "1L", "1.5L"];
 
 const useResponsive = () => {
   const [isTablet, setIsTablet] = useState(false);
@@ -189,7 +189,7 @@ const [editProductoId, setEditProductoId] = useState(null);
 // Enviar el nuevo producto terminado al backend
   const handleGuardarProducto = async () => {
     // 1. Validaciones básicas en el cliente
-    if (!nombreProductoSel.trim() || !tipoProducto.trim() || !precio || recetaInsumos.length === 0) {
+    if (!nombreProductoSel.trim() || !tipoProducto.trim() || !precio) {
       message.error("Por favor completa todos los campos y añade al menos un insumo.");
       return;
     }
