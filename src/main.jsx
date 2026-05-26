@@ -15,6 +15,10 @@ import Menu from "./pages/Menu.jsx";
 import ProductosPage from "./pages/Productos/Productos.page.jsx";
 import InicioAdmin from "./pages/Admin/Inicio.admin.jsx";
 import MenuAdmin from "./components/Menu_admin.componente.jsx";
+
+import CocinaPage from "./pages/Cocina/Cocina.page.jsx"
+import UsuariosPage from "./pages/Usuarios/Usuarios.page.jsx"
+
 import MostradorPage from "./pages/Mostrador/Mostrador.page.jsx";
 import SeleccionProducto from "./pages/Mostrador/SeleccionPage.jsx";
 import ReportesPage from "./pages/Reportes/Reportes.page.jsx";
@@ -27,12 +31,15 @@ ReactDOM.createRoot(root).render(
 
       <Route path="/admin/productos" element={<ProductosPage />} />
       <Route path="/admin" element={<InicioAdmin />} />
+      <Route path="/admin/usuarios" element={<UsuariosPage />} />
+      
       <Route path="/admin/reportes" element={<ReportesPage />} />
 
      {/*----------- MOSTRADOR PAGES*/}
       <Route path="/mostrador" element={<MostradorPage />} />
       <Route path="/mostrador/seleccion" element={<SeleccionProducto />} />
      {/*----------- COCINA PAGES*/}
+     <Route path="/cocina" element={<CocinaPage />} />
 
      
     </Routes>
