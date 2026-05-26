@@ -82,7 +82,7 @@ const LoginPage = () => {
         showConfirmButton: false
       });
 
-      navigate("/admin/panel");
+      navigate("/admin");
 
     } catch (error) {
 

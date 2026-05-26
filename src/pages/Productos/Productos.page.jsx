@@ -16,7 +16,7 @@ const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
 // DATOS SIMULADOS PARA LOS SELECTS DEL MODAL (Mantenemos tamaños)
-const mockTamanos = ["Chico", "Mediano", "Grande", "Jumbo", "600 ml"];
+const mockTamanos = ["Chico", "Mediano", "Grande", "Jumbo", "600 ml", "1L", "1.5L"];
 
 const useResponsive = () => {
   const [isTablet, setIsTablet] = useState(false);

@@ -19,19 +19,25 @@ import MenuAdmin from "./components/Menu_admin.componente.jsx";
 import CocinaPage from "./pages/Cocina/Cocina.page.jsx"
 import UsuariosPage from "./pages/Usuarios/Usuarios.page.jsx"
 
+import MostradorPage from "./pages/Mostrador/Mostrador.page.jsx";
+import SeleccionProducto from "./pages/Mostrador/SeleccionPage.jsx";
+import ReportesPage from "./pages/Reportes/Reportes.page.jsx";
 ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
      {/*----------- ADMIN PAGES*/}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/menu" element={<Menu />} />
+
       <Route path="/admin/productos" element={<ProductosPage />} />
       <Route path="/admin" element={<InicioAdmin />} />
       <Route path="/admin/usuarios" element={<UsuariosPage />} />
       
+      <Route path="/admin/reportes" element={<ReportesPage />} />
 
      {/*----------- MOSTRADOR PAGES*/}
-
+      <Route path="/mostrador" element={<MostradorPage />} />
+      <Route path="/mostrador/seleccion" element={<SeleccionProducto />} />
      {/*----------- COCINA PAGES*/}
      <Route path="/cocina" element={<CocinaPage />} />
 
