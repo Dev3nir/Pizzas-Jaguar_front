@@ -186,9 +186,8 @@ const [editProductoId, setEditProductoId] = useState(null);
   };
 
   // Enviar el nuevo producto terminado al backend
-// Enviar el nuevo producto terminado al backend
   const handleGuardarProducto = async () => {
-    // 1. Validaciones básicas en el cliente
+    // 1. Validaciones básicas
     if (!nombreProductoSel.trim() || !tipoProducto.trim() || !precio || recetaInsumos.length === 0) {
       message.error("Por favor completa todos los campos y añade al menos un insumo.");
       return;
@@ -199,13 +198,13 @@ const [editProductoId, setEditProductoId] = useState(null);
       (item) => item.nombre.toLowerCase() === nombreProductoSel.toLowerCase().trim()
     );
 
-    // 3. Estructurar el JSON exactamente como lo pide tu controlador en el Backend
+    // 3. Estructurar el JSON exactam
     const payload = {
       catalogo: {
         esNuevo: !itemExistente, // true si es texto libre, false si coincide con el catálogo
         id_catalogo: itemExistente ? itemExistente.id_catalogo : null,
         nombre: nombreProductoSel.trim(),
-        descripcion: tipoProducto.trim() // Tu back usa 'descripcion' como el tipo
+        descripcion: tipoProducto.trim() 
       },
       producto: {
         tamano: tamanoSel,
@@ -220,13 +219,13 @@ const [editProductoId, setEditProductoId] = useState(null);
     try {
       setLoading(true);
       
-      // Enviamos el payload estructurado mediante POST
+
       await axios.post(`${API_URL}/productos/`, payload);
       
-      // Desplegamos el alert que me solicitaste
+
       alertSuccess("Datos guardados correctamente");
       
-      // Cerrar modal y limpiar el formulario para la próxima entrada
+
       setIsModalOpen(false);
       setNombreProductoSel("");
       setTipoProducto("");
@@ -238,7 +237,7 @@ const [editProductoId, setEditProductoId] = useState(null);
       
     } catch (error) {
       console.error("Error al guardar producto:", error);
-      // Extraemos el mensaje de error específico que mandó el Back si existe
+
       const mensajeError = error.response?.data?.error || "No se pudo guardar el producto";
       message.error(mensajeError);
     } finally {

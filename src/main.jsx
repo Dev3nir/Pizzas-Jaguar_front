@@ -16,6 +16,9 @@ import ProductosPage from "./pages/Productos/Productos.page.jsx";
 import InicioAdmin from "./pages/Admin/Inicio.admin.jsx";
 import MenuAdmin from "./components/Menu_admin.componente.jsx";
 
+import CocinaPage from "./pages/Cocina/Cocina.page.jsx"
+import UsuariosPage from "./pages/Usuarios/Usuarios.page.jsx"
+
 ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
@@ -24,11 +27,13 @@ ReactDOM.createRoot(root).render(
       <Route path="/menu" element={<Menu />} />
       <Route path="/admin/productos" element={<ProductosPage />} />
       <Route path="/admin" element={<InicioAdmin />} />
+      <Route path="/admin/usuarios" element={<UsuariosPage />} />
       
 
      {/*----------- MOSTRADOR PAGES*/}
 
      {/*----------- COCINA PAGES*/}
+     <Route path="/cocina" element={<CocinaPage />} />
 
      
     </Routes>
