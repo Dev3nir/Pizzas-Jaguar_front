@@ -50,7 +50,7 @@ const COLOR_PALETTE = [
   { left: "#8E24AA", right: "#6A1B9A" }, // Morado
 ];
 
-// Asigna un color diferente basado en el ID del pedido
+
 const getRowColors = (idPedido) => {
   const index = idPedido % COLOR_PALETTE.length;
   return COLOR_PALETTE[index];
@@ -88,7 +88,7 @@ const fadeSlideVariants = {
 };
 
 // ============================================================
-// COMPONENTE MODAL PARA EDITAR PEDIDO (VERSIÓN DIV PERSONALIZADO)
+// COMPONENTE MODAL PARA EDITAR PEDIDO 
 // ============================================================
 const EditarPedidoModal = ({ visible, pedido, onClose, onSuccess, fetchPedidos }) => {
   const [productosAPI, setProductosAPI] = useState([]);
@@ -792,7 +792,7 @@ const MostradorPage = () => {
     setTimeout(() => setSelectedPedido(null), 300);
   };
 
-  // Abrir modal de edición
+  
   const handleOpenEditar = () => {
     if (isPedidoCancelado()) {
       Swal.fire('Información', 'No se puede editar un pedido cancelado', 'info');
