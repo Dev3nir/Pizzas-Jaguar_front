@@ -1,16 +1,38 @@
-import { Button } from "antd";
-import { useState, useEffect } from "react";
+// src/pages/cocina/Cocina.jsx
+import { Button, message } from "antd";
+import { useState, useEffect, useRef } from "react"; // <-- Importamos useRef
 import axios from 'axios';
+import { io } from "socket.io-client";
+
 import HeaderComponent from "../../components/HeaderCocina.component.jsx";
 import Logo from "../../assets/logos/logo.png";
 import pizzaImage from '../../assets/pizz.png';
 import API_URL from "../../config/backend.js";
+import WEBSOCKET_URL from "../../config/websockets.js";
 
 // ENUM para las fases de la Pizza
 const FASES_PIZZA = {
   AMASADO: "Amasado",
   VESTIDA: "Vestida",
   HORNEADA: "Horneada",
+};
+
+// Paleta de colores para los pedidos
+const PALETA_COLORES = [
+  { main: "#E13A30", dark: "#B82921" }, // Rojo
+  { main: "#4EACEC", dark: "#3B8CBE" }, // Azul
+  { main: "#F3A123", dark: "#C68019" }, // Naranja
+  { main: "#97C56A", dark: "#7AA254" }, // Verde
+  { main: "#9B59B6", dark: "#7E4794" }, // Morado
+  { main: "#34495E", dark: "#243342" }, // Azul Marino
+];
+
+// Función para obtener siempre el mismo color según el ID del pedido
+const getColorParaPedido = (idPedido) => {
+  let numId = typeof idPedido === 'string' ? parseInt(idPedido.match(/\d+/) || 0, 10) : idPedido;
+  if (isNaN(numId)) numId = 0;
+  const index = numId % PALETA_COLORES.length;
+  return PALETA_COLORES[index];
 };
 
 const Cocina = () => {
@@ -22,7 +44,17 @@ const Cocina = () => {
   const [segundos, setSegundos] = useState(0);
   const [cronometroActivo, setCronometroActivo] = useState(false);
 
-  // ========== ESTILOS REUTILIZABLES (DENTRO del componente) ==========
+  // Guardamos la instancia del WebSocket para poder emitir fuera del useEffect
+  const socketRef = useRef(null);
+
+  // Configuración de Toasts
+  message.config({
+    top: 80,
+    duration: 3,
+    maxCount: 3,
+  });
+
+  // ========== ESTILOS REUTILIZABLES ==========
   const itemPedidoStyle = {
     color: "white",
     cursor: "pointer",
@@ -30,7 +62,6 @@ const Cocina = () => {
     transition: "all 0.3s ease",
     overflow: "hidden",
     boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-    backgroundColor: "#E13A30", // COLOR FIJO ROJO
   };
 
   const divisorVertical = {
@@ -40,7 +71,7 @@ const Cocina = () => {
     margin: "0 20px",
   };
 
-  // ==
+  // ========== PETICIONES ==========
   const cambiarAEnPreparacion = async (idPedido) => {
     try {
       const url = `${API_URL}/cocina/${idPedido}`;
@@ -80,58 +111,73 @@ const Cocina = () => {
   const isTablet = useResponsive();
   const headerHeight = isTablet ? 70 : 90;
 
-  // ========== FUNCIONES DE BD ==========
-
-  // Función para generar folio con prefijo según tipo de pedido
-const generateFolio = (pedido) => {
-  // Obtener el ID numérico del pedido (ej: de "123" o "001M")
-  let numeroId = pedido.id_pedido;
-  
-  // Si el id_pedido es numérico, lo usamos directamente
-  // Si ya tiene formato mixto, extraemos la parte numérica
-  if (typeof pedido.id_pedido === 'string') {
-    const match = pedido.id_pedido.match(/\d+/);
-    numeroId = match ? match[0] : pedido.id_pedido;
-  }
-  
-  // Formatear a 3 dígitos (001, 002, 015, 123, etc.)
-  const folioNumero = String(numeroId).padStart(3, '0');
-  
-  // Determinar la letra según el tipo de pedido
-  let letra = '';
-  const tipo = (pedido.tipo_pedido || '').toLowerCase();
-  
-  if (tipo === 'Domicilio') {
-    letra = 'D';
-  } else if (tipo === 'Mostrador') {
-    letra = 'M';
-  } else if (tipo === 'Salón' || tipo === 'Salon') {
-    letra = 'S';
-  } else if (tipo === 'Rappi') {
-    letra = 'R';
-  } else {
-    letra = ''; // Si no hay tipo, sin letra
-  }
-  
-  return `${folioNumero}${letra}`;
-};
-
-const cargarPedidos = async () => {
-  try {
-    const url = `${API_URL}/cocina/`;
-    const response = await axios.get(url);
+  // ========== FUNCIONES DE LÓGICA ==========
+  const generateFolio = (pedido) => {
+    let numeroId = pedido.id_pedido;
+    if (typeof pedido.id_pedido === 'string') {
+      const match = pedido.id_pedido.match(/\d+/);
+      numeroId = match ? match[0] : pedido.id_pedido;
+    }
+    const folioNumero = String(numeroId).padStart(3, '0');
+    let letra = '';
+    const tipo = (pedido.tipo_pedido || '').toLowerCase();
     
-    // Procesar los pedidos para agregar el folio generado
-    const pedidosConFolio = response.data.map(pedido => ({
-      ...pedido,
-      folio: generateFolio(pedido) // Agregar el folio generado
-    }));
+    if (tipo === 'domicilio') letra = 'D';
+    else if (tipo === 'mostrador') letra = 'M';
+    else if (tipo === 'salón' || tipo === 'salon') letra = 'S';
+    else if (tipo === 'rappi') letra = 'R';
     
-    setPedidos(pedidosConFolio);
-  } catch (error) {
-    console.error("Error cargando pedidos:", error);
-  }
-};
+    return `${folioNumero}${letra}`;
+  };
+
+  const cargarPedidos = async () => {
+    try {
+      const url = `${API_URL}/cocina/`;
+      const response = await axios.get(url);
+      const pedidosConFolio = response.data.map(pedido => ({
+        ...pedido,
+        folio: generateFolio(pedido),
+        colorTheme: getColorParaPedido(pedido.id_pedido)
+      }));
+      setPedidos(pedidosConFolio);
+    } catch (error) {
+      console.error("Error cargando pedidos:", error);
+      message.error("Error al cargar los pedidos del servidor");
+    }
+  };
+
+  // ========== WEBSOCKETS ==========
+  useEffect(() => {
+    // Guardamos la conexión en la referencia
+    socketRef.current = io(WEBSOCKET_URL);
+
+    socketRef.current.emit('join-pedidos'); 
+
+    socketRef.current.on('nuevo-pedido', (payload) => {
+      console.log("¡Nuevo pedido recibido en Cocina por WS!", payload);
+
+      if (payload && payload.data && payload.data.length > 0) {
+        const nuevoPedido = payload.data[0];
+        nuevoPedido.folio = generateFolio(nuevoPedido);
+        nuevoPedido.colorTheme = getColorParaPedido(nuevoPedido.id_pedido); 
+
+        message.info(` ¡Nuevo pedido recibido! Folio: ${nuevoPedido.folio}`);
+
+        setPedidos((pedidosAnteriores) => {
+          const yaExiste = pedidosAnteriores.find(p => p.id_pedido === nuevoPedido.id_pedido);
+          if (yaExiste) return pedidosAnteriores;
+          return [nuevoPedido, ...pedidosAnteriores];
+        });
+      }
+    });
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off('nuevo-pedido');
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
 
   // ========== CRONÓMETRO ==========
   useEffect(() => {
@@ -152,14 +198,12 @@ const cargarPedidos = async () => {
     return `${minutos.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // ========== MANEJADORES ==========
-  
+  // ========== EFECTO INICIAL ==========
   useEffect(() => {
     cargarPedidos();
-    const interval = setInterval(cargarPedidos, 30000);
-    return () => clearInterval(interval);
   }, []);
 
+  // ========== MANEJADORES DE UI ==========
   const handleSelectPedido = (idPedido) => {
     if (pedidoActivo) return;
     setPedidoSeleccionadoId(pedidoSeleccionadoId === idPedido ? null : idPedido);
@@ -173,7 +217,7 @@ const cargarPedidos = async () => {
         ...prod,
         esPizza: prod.nombre.toLowerCase().includes('pizza'),
         fase: FASES_PIZZA.AMASADO,
-        extras: prod.extras?.map(e => e.insumo_nombre).join(', ') || "Ninguno",
+        extras: prod.extras?.map(e => e.insumo_nombre || e.nombre || "").join(', ') || "Ninguno",
         observaciones: prod.observaciones || "Ninguna",
         imagen: pizzaImage
       }));
@@ -186,9 +230,11 @@ const cargarPedidos = async () => {
       setSegundos(0);
       setCronometroActivo(true);
       
+      message.success(`Iniciando preparación del pedido ${pedido.folio}`);
       await cargarPedidos();
     } catch (error) {
       console.error("Error al iniciar pedido:", error);
+      message.error("No se pudo iniciar el pedido. Intente nuevamente.");
     }
   };
 
@@ -214,8 +260,21 @@ const cargarPedidos = async () => {
     if (!pedidoActivo) return;
     
     try {
+      // 1. Lo mandamos cambiar a finalizado en BD
       const resultado = await cambiarAFinalizado(pedidoActivo.id_pedido);
-      alertSuccess(resultado.message || `Pedido terminado correctamente`);
+      message.success(resultado.message || ` Pedido ${pedidoActivo.folio} terminado correctamente`);
+      
+      // 2. EMITIMOS EL EVENTO WEBSOCKET AVISANDO QUE ESTÁ TERMINADO
+      if (socketRef.current) {
+        socketRef.current.emit('pedido-terminado', {
+          id_pedido: pedidoActivo.id_pedido,
+          folio: pedidoActivo.folio,
+          estado: "Finalizado",
+          emisor: "cocina"
+        });
+      }
+      
+      // 3. Limpiamos la UI
       setCronometroActivo(false);
       setPedidoActivo(null);
       setProductoActual(null);
@@ -223,8 +282,7 @@ const cargarPedidos = async () => {
       await cargarPedidos();
     } catch (error) {
       console.error("Error al terminar pedido:", error);
-      const mensajeError = error.response?.data?.error || error.message || "No se pudo terminar el pedido";
-      alertError(mensajeError);
+      message.error("Error al intentar finalizar el pedido.");
     }
   };
 
@@ -254,6 +312,7 @@ const cargarPedidos = async () => {
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 {pedidos.map((pedido) => {
                   const isDesplegado = pedidoSeleccionadoId === pedido.id_pedido;
+                  const bgColor = isDesplegado ? pedido.colorTheme.dark : pedido.colorTheme.main;
 
                   return (
                     <div
@@ -261,7 +320,7 @@ const cargarPedidos = async () => {
                       onClick={() => handleSelectPedido(pedido.id_pedido)}
                       style={{
                         ...itemPedidoStyle,
-                        backgroundColor: isDesplegado ? "#aa2f29" : "#E13A30", // COLOR FIJO
+                        backgroundColor: bgColor, 
                         borderRadius: isDesplegado ? "25px" : "100px",
                         flexDirection: "column",
                         alignItems: "stretch",
@@ -320,7 +379,7 @@ const cargarPedidos = async () => {
               </div>
             </div>
           ) : (
-            // PANTALLA 3 (tu código actual de pedido activo - se mantiene igual)
+            // PANTALLA DE PEDIDO ACTIVO
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <h2 style={{ fontSize: "28px", fontWeight: "bold", color: "#333", marginBottom: "35px" }}>
                 Pedido actual
@@ -332,7 +391,7 @@ const cargarPedidos = async () => {
                 <div style={{ flex: 2.3, display: "flex", flexDirection: "column" }}>
                   <div style={{ position: "relative", marginLeft: "80px" }}>
                     <div style={{ 
-                      backgroundColor: "#E13A30", 
+                      backgroundColor: pedidoActivo.colorTheme.main,
                       borderRadius: "35px", 
                       padding: "30px 40px 30px 200px",
                       color: "white", 
@@ -341,10 +400,10 @@ const cargarPedidos = async () => {
                       display: "flex", 
                       alignItems: "flex-start",
                       gap: "30px",
-                      boxShadow: "0px 10px 25px rgba(225,58,48,0.15)"
+                      boxShadow: `0px 10px 25px ${pedidoActivo.colorTheme.main}40`
                     }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "40px", borderBottom: "4px solid rgba(182, 43, 43, 0.86)", paddingBottom: "10px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "40px", borderBottom: "4px solid rgba(255, 255, 255, 0.3)", paddingBottom: "10px" }}>
                           <span style={{ fontSize: "32px", fontWeight: "bold" }}>{productoActual?.nombre}</span>
                           {productoActual?.tamano && <span style={{ fontSize: "26px", opacity: 0.9 }}>| {productoActual.tamano}</span>}
                           {productoActual?.orillaQueso && (
@@ -383,7 +442,7 @@ const cargarPedidos = async () => {
                       <Button
                         onClick={handleSiguienteFase}
                         style={{
-                          backgroundColor: "#E13A30",
+                          backgroundColor: pedidoActivo.colorTheme.main,
                           color: "white",
                           border: "none",
                           borderRadius: "100px",
@@ -391,7 +450,7 @@ const cargarPedidos = async () => {
                           height: "45px",
                           fontSize: "18px",
                           fontWeight: "bold",
-                          boxShadow: "0px 4px 10px rgba(225,58,48,0.2)"
+                          boxShadow: `0px 4px 10px ${pedidoActivo.colorTheme.main}40`
                         }}
                       >
                         {productoActual.fase}

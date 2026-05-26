@@ -726,7 +726,7 @@ const MostradorPage = () => {
     socket.on("nuevo-pedido", (payload) => {
       if (payload?.data) {
         setPedidos((prev) => [
-          { ...payload.data, estado_pedido: payload.data.estado || "Pendiente" },
+          { ...payload.data, estado_pedido: "PREPARADO" || "Pendiente" },
           ...prev,
         ]);
       }
@@ -758,6 +758,56 @@ const MostradorPage = () => {
     fetchPedidos();
   }, []);
 
+
+// src/pages/admin/MostradorPage.jsx (Fragmento del WebSocket actualizado)
+
+  // ========== WEBSOCKETS (CONECTAR OYENTE Y ACTUALIZAR ESTADO) ==========
+  useEffect(() => {
+    // Inicializamos el socket
+    const socket = io(WEBSOCKET_URL);
+
+    // Unirse a la sala para recibir eventos
+    socket.emit("join-pedidos");
+
+    // 1. Escuchar nuevo pedido
+    socket.on("nuevo-pedido", (payload) => {
+      if (payload?.data) {
+        console.log("Nuevo pedido recibido:", payload.data);
+        // Toast de nuevo pedido
+        message.info(` ¡Nuevo pedido de ${payload.data[0].cliente_nombre}!`);
+        
+        setPedidos((prev) => [
+          { ...payload.data[0], estado_pedido: "Pendiente" },
+          ...prev,
+        ]);
+      }
+    });
+
+    // 2. Escuchar cuando Cocina termina un pedido
+    socket.on("notificar-pedido-terminado", (data) => {
+      console.log("Pedido terminado recibido:", data);
+      
+      // Toast de éxito
+      message.success(`Pedido ${data.folio} ha sido terminado por cocina`);
+
+      // Actualizamos el estado en la lista sin recargar la página
+      setPedidos((prev) =>
+        prev.map((p) =>
+          // Comparamos el ID del pedido terminado con los de la lista
+          p.id_pedido === data.id_pedido
+            ? { ...p, estado_pedido: "PREPARADO" } // Cambiamos a Finalizada para que el botón sea amarillo
+            : p
+        )
+      );
+    });
+
+    // Limpieza al desmontar
+    return () => {
+      socket.off("nuevo-pedido");
+      socket.off("notificar-pedido-terminado");
+      socket.disconnect();
+    };
+  }, []);
   // Modales
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => {
