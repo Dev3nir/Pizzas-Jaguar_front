@@ -345,7 +345,7 @@ const [procesando, setProcesando] = useState(false);
   };
 
  const handleFinalizar = () => {
-  setProcesando(true); // Activa el loader
+  setProcesando(true); 
 
   const productosLimpio = carrito.map(item => ({
     id_producto: item.id_producto,
@@ -379,7 +379,7 @@ const [procesando, setProcesando] = useState(false);
       Swal.fire({ icon: 'error', title: 'Error', text: 'Hubo un problema al registrar el pedido.' });
     })
     .finally(() => {
-      setProcesando(false); // Desactiva el loader sin importar el resultado
+      setProcesando(false); 
     });
 };
 
@@ -665,7 +665,7 @@ const [procesando, setProcesando] = useState(false);
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  layout // <--- Hace que los elementos fluyan suavemente cuando uno desaparece
+                  layout 
                 >
                   {mostrarResumen ? (
                     <div style={{ backgroundColor: "#EBEBEB", padding: "10px 15px", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "8px" }}>
@@ -703,11 +703,11 @@ const [procesando, setProcesando] = useState(false);
               <Button 
   onClick={handleFinalizar} 
   size="large" 
-  loading={procesando} // <--- Muestra el spinner de Ant Design
-  disabled={procesando} // <--- Deshabilita el botón mientras procesa
+  loading={procesando} 
+  disabled={procesando} 
   style={{ 
     marginTop: "20px", 
-    backgroundColor: procesando ? "#CCC" : "transparent", // Opcional: cambio visual
+    backgroundColor: procesando ? "#CCC" : "transparent", 
     borderColor: "#F5A623", 
     color: "#F5A623", 
     fontWeight: "bold", 

@@ -17,6 +17,7 @@ import InicioAdmin from "./pages/Admin/Inicio.admin.jsx";
 import MenuAdmin from "./components/Menu_admin.componente.jsx";
 import MostradorPage from "./pages/Mostrador/Mostrador.page.jsx";
 import SeleccionProducto from "./pages/Mostrador/SeleccionPage.jsx";
+import ReportesPage from "./pages/Reportes/Reportes.page.jsx";
 ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
@@ -26,7 +27,7 @@ ReactDOM.createRoot(root).render(
 
       <Route path="/admin/productos" element={<ProductosPage />} />
       <Route path="/admin" element={<InicioAdmin />} />
-      
+      <Route path="/admin/reportes" element={<ReportesPage />} />
 
      {/*----------- MOSTRADOR PAGES*/}
       <Route path="/mostrador" element={<MostradorPage />} />
