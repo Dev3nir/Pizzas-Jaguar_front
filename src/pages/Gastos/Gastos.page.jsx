@@ -51,6 +51,12 @@ const GastosPage = () => {
     title: "",
     text: ""
   });
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
 
   // --- ESTADOS DE FORMULARIO ---
   const [formConcepto, setFormConcepto] = useState("");

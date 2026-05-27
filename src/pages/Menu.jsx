@@ -11,9 +11,6 @@ import {
 } from "@mui/material";
 
 import WEBSOCKET_URL from "../config/websockets.js";
-import API_URL from "../config/backend.js";
-
-import axios from "axios";
 
 const socket = io(WEBSOCKET_URL);
 
@@ -25,22 +22,21 @@ const Menu = () => {
     const [role, setRole] = useState("");
     const [token, setToken] = useState(null);
 
-    const [usuarios, setUsuarios] = useState([]);
-    const [userID, setUserID] = useState("");
-
     // =========================
     // RESTAURAR SESIÓN
     // =========================
     useEffect(() => {
 
-        const savedToken = localStorage.getItem("token_table");
-        const expiresAt = localStorage.getItem("token_table_exp");
+        const savedToken =
+            localStorage.getItem("token_table");
+
+        const expiresAt =
+            localStorage.getItem("token_table_exp");
 
         if (savedToken && expiresAt) {
 
             const now = Date.now();
 
-            // TOKEN VÁLIDO
             if (now < Number(expiresAt)) {
 
                 setToken(savedToken);
@@ -50,13 +46,12 @@ const Menu = () => {
 
             } else {
 
-                // TOKEN EXPIRADO
                 localStorage.removeItem("token_table");
                 localStorage.removeItem("token_table_exp");
 
-                console.log("Token expirado");
-
                 setSession(false);
+
+                console.log("Token expirado");
             }
 
         } else {
@@ -72,7 +67,6 @@ const Menu = () => {
     // =========================
     useEffect(() => {
 
-        // Ya hay token restaurado
         if (token) return;
 
         socket.emit("join-table", 1);
@@ -81,7 +75,6 @@ const Menu = () => {
 
             if (data.session) {
 
-                // 5 minutos
                 const expiration =
                     Date.now() + (5 * 60 * 1000);
 
@@ -124,7 +117,6 @@ const Menu = () => {
 
                 const now = Date.now();
 
-                // EXPIRÓ
                 if (now >= Number(expiresAt)) {
 
                     localStorage.removeItem("token_table");
@@ -144,39 +136,9 @@ const Menu = () => {
     }, [token]);
 
     // =========================
-    // OBTENER USUARIOS
+    // CAMBIO DE ROL
     // =========================
-    const handleusuarios = async () => {
-
-        try {
-
-            const response = await axios.get(
-                `${API_URL}/usuarios`
-            );
-
-            // EXCLUIR ADMINS
-            const filtrados = response.data.filter(
-                (u) => u.rol !== "Administrador"
-            );
-
-            setUsuarios(filtrados);
-
-            console.log("Usuarios:", filtrados);
-
-        } catch (error) {
-
-            console.error(
-                "Error al obtener usuarios:",
-                error
-            );
-
-        }
-    };
-
-    // =========================
-    // CAMBIO ROL
-    // =========================
-    const handleRoleChange = async (e) => {
+    const handleRoleChange = (e) => {
 
         const selectedRole = e.target.value;
 
@@ -185,47 +147,25 @@ const Menu = () => {
         // MOSTRADOR
         if (selectedRole === "mostrador") {
 
-            await handleusuarios();
-
-        }
-    };
-
-    // =========================
-    // NAVEGACIÓN
-    // =========================
-    useEffect(() => {
-
-        // MOSTRADOR
-        if (
-            role === "mostrador" &&
-            token &&
-            userID
-        ) {
-
             navigate("/mostrador", {
                 state: {
-                    token: token,
-                    userID: userID
+                    token
                 }
             });
 
         }
 
         // COCINA
-        else if (
-            role === "cocina" &&
-            token
-        ) {
+        else if (selectedRole === "cocina") {
 
             navigate("/cocina", {
                 state: {
-                    token: token
+                    token
                 }
             });
 
         }
-
-    }, [role, token, userID, navigate]);
+    };
 
     // =========================
     // LOADING
@@ -281,7 +221,6 @@ const Menu = () => {
                 Selecciona el área para continuar
             </Typography>
 
-            {/* SELECT ROL */}
             <Select
                 value={role}
                 onChange={handleRoleChange}
@@ -294,49 +233,14 @@ const Menu = () => {
                 </MenuItem>
 
                 <MenuItem value="mostrador">
-                    🍕 Mostrador
+                    Mostrador
                 </MenuItem>
 
                 <MenuItem value="cocina">
-                    👨‍🍳 Cocina
+                    Cocina
                 </MenuItem>
 
             </Select>
-
-            {/* SELECT USUARIO */}
-            {
-                role === "mostrador" && (
-
-                    <Select
-                        value={userID}
-                        onChange={(e) =>
-                            setUserID(e.target.value)
-                        }
-                        displayEmpty
-                        sx={{ minWidth: 250 }}
-                    >
-
-                        <MenuItem value="">
-                            Selecciona el usuario
-                        </MenuItem>
-
-                        {
-                            usuarios.map((usuario) => (
-
-                                <MenuItem
-                                    key={usuario.id_usuario}
-                                    value={usuario.id_usuario}
-                                >
-                                    {usuario.nombre}
-                                </MenuItem>
-
-                            ))
-                        }
-
-                    </Select>
-
-                )
-            }
 
         </Box>
     );

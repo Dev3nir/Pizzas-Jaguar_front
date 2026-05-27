@@ -62,6 +62,13 @@ const UsuariosPage = () => {
   const [editRolUsuario, setEditRolUsuario] = useState('');
   const [editEstadoUsuario, setEditEstadoUsuario] = useState(true);
 
+
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
   // ==========================================
   // MÉTODOS DE API
   // ==========================================

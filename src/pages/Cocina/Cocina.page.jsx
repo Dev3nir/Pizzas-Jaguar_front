@@ -152,6 +152,10 @@ const Cocina = () => {
     socketRef.current = io(WEBSOCKET_URL);
 
     socketRef.current.emit('join-pedidos'); 
+    // Escuchamos por nuevos pedidos
+    if (socketRef.current) {
+      console.log("Escuchando por nuevos pedidos en Cocina...");
+    }
 
     socketRef.current.on('nuevo-pedido', (payload) => {
       console.log("¡Nuevo pedido recibido en Cocina por WS!", payload);

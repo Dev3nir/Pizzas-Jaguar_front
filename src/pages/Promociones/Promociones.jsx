@@ -101,6 +101,13 @@ const Promociones = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 const [selectedPromo, setSelectedPromo] = useState(null);
 
+
+const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
   // =========================
   // OBTENER PROMOCIONES (Fetch)
   // =========================
