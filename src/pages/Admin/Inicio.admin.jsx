@@ -1,3 +1,5 @@
+// src/pages/Admin/Inicio.admin.jsx
+
 import API_URL from "../../config/backend.js";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -6,9 +8,11 @@ import HeaderComponent from "../../components/Header.component.jsx";
 import Logo from "../../assets/logos/logo.png";
 
 // Importaciones de Ant Design
-import { Button } from "antd";
+import { Button, message } from "antd"; 
 import { MoneyCollectOutlined, ShopOutlined, InboxOutlined, DollarOutlined } from "@ant-design/icons";
 import { flex, maxWidth, width } from "@mui/system";
+
+import CajaModales from "../Caja/Caja.page.jsx";
 
 const InicioAdmin = () => {
     // Variables
@@ -16,6 +20,17 @@ const InicioAdmin = () => {
     const [ventasMes, setVentasMes] = useState(0);
     const [productovendido, setProductosAgotados] = useState("Cargando...");
 
+    // ========================================================
+    // ESTADOS PARA EL CONTROL DE LA CAJA
+    // ========================================================
+    const [loadingCaja, setLoadingCaja] = useState(false);
+    const [cajaHoy, setCajaHoy] = useState(null); 
+    const [estimado, setEstimado] = useState(null); 
+    const [modalType, setModalType] = useState(null); 
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successData, setSuccessData] = useState({ title: "", text: "" });
+    const [montoInput, setMontoInput] = useState("");
+    // ======
     const fetchData = async () => {
         try {
             const url = `${API_URL}/mostrador/pedidos/estadisticas`;
@@ -29,8 +44,93 @@ const InicioAdmin = () => {
         }
     };
 
+    // ========================================================
+    // >>>PETICIONES HTTP Y MANEJADORES DE CAJA
+    // ========================================================
+    const consultarEstadoCaja = async () => {
+        try {
+            const resCaja = await axios.get(`${API_URL}/caja/hoy`);
+            setCajaHoy(resCaja.data);
+            if (resCaja.data && resCaja.data.montoFinal === null) {
+                const resEstimado = await axios.get(`${API_URL}/caja/monto-estimado`);
+                setEstimado(resEstimado.data);
+            }
+        } catch (error) {
+            console.error("Error al consultar estado de caja:", error);
+        }
+    };
+
+    const intentarAbrir = () => {
+        if (cajaHoy) {
+            setModalType('info');
+        } else {
+            setMontoInput("");
+            setModalType('abrir');
+        }
+    };
+
+    const ejecutarApertura = async () => {
+        if (!montoInput || parseFloat(montoInput) < 0) {
+            message.warning("Por favor ingresa un monto inicial válido");
+            return;
+        }
+        try {
+            setLoadingCaja(true);
+            await axios.post(`${API_URL}/caja/abrir`, { montoInicial: parseFloat(montoInput) });
+            setModalType(null);
+            setSuccessData({
+                title: "¡Registro exitoso!",
+                text: "La caja se ha inicializado correctamente"
+            });
+            setShowSuccess(true);
+            consultarEstadoCaja();
+        } catch (error) {
+            message.error(error.response?.data?.error || "No se pudo abrir la caja");
+        } finally {
+            setLoadingCaja(false);
+        }
+    };
+
+    const intentarCerrar = () => {
+        if (!cajaHoy) {
+            setModalType('error_cierre');
+        } else if (cajaHoy.montoFinal !== null) {
+            message.info("La caja de hoy ya está cerrada.");
+        } else {
+            setMontoInput(estimado?.montoEstimado || ""); 
+            setModalType('cerrar');
+        }
+    };
+
+    const ejecutarCierre = async () => {
+        if (!montoInput || parseFloat(montoInput) < 0) {
+            message.warning("Por favor ingresa el monto final real");
+            return;
+        }
+        try {
+            setLoadingCaja(true);
+            await axios.put(`${API_URL}/caja/cerrar`, { montoFinal: parseFloat(montoInput) });
+            setModalType(null);
+            setSuccessData({
+                title: "¡Registro exitoso!",
+                text: "La caja se ha cerrado correctamente"
+            });
+            setShowSuccess(true);
+            consultarEstadoCaja();
+        } catch (error) {
+            message.error(error.response?.data?.error || "No se pudo cerrar la caja");
+        } finally {
+            setLoadingCaja(false);
+        }
+    };
+    // ========================================================
     useEffect(() => {
         fetchData();
+        // ========================================================
+        // MANDAR LLAMAR LA CONSULTA DE CAJA AL MONTAR
+        // ========================================================
+        consultarEstadoCaja();
+
     }, []);
 
     const useResponsive = () => {
@@ -86,6 +186,7 @@ const InicioAdmin = () => {
                     <div style={{ display: "flex", justifyContent: "center", gap: "25px", margin: "60px 0" }}>
                         <Button 
                             size="large" 
+                            onClick={intentarAbrir} // MODIFICACIÓN 6: Asignación del evento click
                             style={{ 
                                 borderRadius: "100px", 
                                 borderColor: "#5A9BD5", 
@@ -101,6 +202,7 @@ const InicioAdmin = () => {
                         </Button>
                         <Button 
                             size="large" 
+                            onClick={intentarCerrar} // Asignación del evento click
                             style={{ 
                                 borderRadius: "100px", 
                                 borderColor: "#D0021B", 
@@ -151,6 +253,22 @@ const InicioAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            <CajaModales 
+                modalType={modalType}
+                setModalType={setModalType}
+                cajaHoy={cajaHoy}
+                estimado={estimado}
+                montoInput={montoInput}
+                setMontoInput={setMontoInput}
+                ejecutarApertura={ejecutarApertura}
+                ejecutarCierre={ejecutarCierre}
+                loadingCaja={loadingCaja}
+                showSuccess={showSuccess}
+                setShowSuccess={setShowSuccess}
+                successData={successData}
+            />
+        
         </div>
     );
 };

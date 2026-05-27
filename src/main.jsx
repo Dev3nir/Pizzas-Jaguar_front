@@ -22,6 +22,12 @@ import UsuariosPage from "./pages/Usuarios/Usuarios.page.jsx"
 import MostradorPage from "./pages/Mostrador/Mostrador.page.jsx";
 import SeleccionProducto from "./pages/Mostrador/SeleccionPage.jsx";
 import ReportesPage from "./pages/Reportes/Reportes.page.jsx";
+import PromocionesPage from "./pages/Promociones/Promociones.jsx"
+
+import CajaPage from "./pages/Caja/Caja.page.jsx";
+import GastosPage from "./pages/Gastos/Gastos.page.jsx"
+
+import InventarioPage from "./pages/Inventario/Inventario.page.jsx"
 ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
@@ -34,6 +40,9 @@ ReactDOM.createRoot(root).render(
       <Route path="/admin/usuarios" element={<UsuariosPage />} />
       
       <Route path="/admin/reportes" element={<ReportesPage />} />
+      <Route path="/admin/inventario" element={<InventarioPage />} />
+      <Route path="/admin/promociones" element={<PromocionesPage />} />
+      <Route path="/admin/gastos" element={<GastosPage />} />
 
      {/*----------- MOSTRADOR PAGES*/}
       <Route path="/mostrador" element={<MostradorPage />} />
