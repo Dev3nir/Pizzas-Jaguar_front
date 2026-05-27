@@ -32,9 +32,10 @@ ReactDOM.createRoot(root).render(
   <BrowserRouter>
     <Routes>
      {/*----------- ADMIN PAGES*/}
-      <Route path="/login" element={<LoginPage />} />
+      {/*redirigir el base a /login*/}
+      <Route path="/" element={<LoginPage />} />
       <Route path="/menu" element={<Menu />} />
-
+      
       <Route path="/admin/productos" element={<ProductosPage />} />
       <Route path="/admin" element={<InicioAdmin />} />
       <Route path="/admin/usuarios" element={<UsuariosPage />} />

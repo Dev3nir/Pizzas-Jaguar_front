@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Select, ConfigProvider, Button, Input, message, Tag } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion"; // <-- IMPORTACIÓN DE FRAMER MOTION
+import { motion, AnimatePresence } from "framer-motion";
 import API_URL from "../../config/backend.js";
 import imagenPizza from "./assets/pizzahd.png";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -45,7 +45,8 @@ const SeleccionProducto = ({ onClose }) => {
   const [insumosAPI, setInsumosAPI] = useState([]);
   const [promocionesAPI, setPromocionesAPI] = useState([]);
   const insumosExtras = insumosAPI.filter(i => i.extra === true);
-const [procesando, setProcesando] = useState(false);
+  const [procesando, setProcesando] = useState(false);
+
   // --- ESTADOS PRINCIPALES ---
   const [tipoProducto, setTipoProducto] = useState("Pizza");
   const [tamano, setTamano] = useState("Grande");
@@ -68,15 +69,21 @@ const [procesando, setProcesando] = useState(false);
   const [listaExtras, setListaExtras] = useState([]);
 
   // --- RESPONSIVIDAD ---
-  const [isMobile, setIsMobile] = useState(false);
-
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const isMobile = windowWidth <= 768;
+  const isTablet = windowWidth > 768 && windowWidth <= 1024;
+  const isSmallScreen = isMobile || isTablet;
+
+  // Tamaños dinámicos para la interfaz de la pizza
+  const pizzaImageSize = isMobile ? "250px" : isTablet ? "350px" : "500px";
+  const pizzaContainerHeight = isMobile ? "200px" : isTablet ? "280px" : "350px";
 
   // --- OBTENER UNIDAD DEL INSUMO SELECCIONADO ---
   const insumoSeleccionado = insumosExtras.find(i => i.id_insumo === extraInsumoId);
@@ -410,7 +417,7 @@ const [procesando, setProcesando] = useState(false);
       <div style={{ display: "flex", flex: 1, flexDirection: isMobile ? "column" : "row", overflow: "hidden" }}>
         
         {/* PANEL IZQUIERDO */}
-        <div style={{ flex: 3, padding: isMobile ? "20px" : "40px", backgroundColor: "#F9F9F6", display: "flex", flexDirection: "column", overflowY: "auto", position: "relative" }}>
+        <div style={{ flex: 3, padding: isSmallScreen ? "20px" : "40px", backgroundColor: "#F9F9F6", display: "flex", flexDirection: "column", overflowY: "auto", position: "relative" }}>
           
           <AnimatePresence mode="wait">
             {mostrarResumen ? (
@@ -420,18 +427,18 @@ const [procesando, setProcesando] = useState(false);
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                style={{ maxWidth: "700px", display: "flex", flexDirection: "column", gap: "40px" }}
+                style={{ width: "100%", maxWidth: "700px", display: "flex", flexDirection: "column", gap: isSmallScreen ? "20px" : "40px" }}
               >
-                <div style={{ display: "flex", gap: "50px", flexWrap: "wrap" }}>
-                  <div>
+                <div style={{ display: "flex", gap: isSmallScreen ? "20px" : "50px", flexWrap: "wrap" }}>
+                  <div style={{ flex: isSmallScreen ? "1 1 100%" : "auto" }}>
                     <label style={{ display: "block", marginBottom: "10px", fontSize: "16px", color: "#333", fontWeight: "bold" }}>Cliente</label>
-                    <div style={{ backgroundColor: "#1A1A1A", color: "#FFF", padding: "10px 15px", fontSize: "16px", minWidth: "180px", textAlign: "center" }}>
+                    <div style={{ backgroundColor: "#1A1A1A", color: "#FFF", padding: "10px 15px", fontSize: "16px", minWidth: isSmallScreen ? "100%" : "180px", textAlign: "center" }}>
                       {cliente || "Mostrador"}
                     </div>
                   </div>
-                  <div>
+                  <div style={{ flex: isSmallScreen ? "1 1 100%" : "auto" }}>
                     <label style={{ display: "block", marginBottom: "10px", fontSize: "16px", color: "#333", fontWeight: "bold" }}>Tipo</label>
-                    <div style={{ backgroundColor: "#1A1A1A", color: "#FFF", padding: "10px 15px", fontSize: "16px", minWidth: "120px", textAlign: "center" }}>
+                    <div style={{ backgroundColor: "#1A1A1A", color: "#FFF", padding: "10px 15px", fontSize: "16px", minWidth: isSmallScreen ? "100%" : "120px", textAlign: "center" }}>
                       {tipoPedido || "Mostrador"}
                     </div>
                   </div>
@@ -439,11 +446,11 @@ const [procesando, setProcesando] = useState(false);
 
                 <div>
                   <h3 style={{ fontSize: "18px", color: "#333", marginBottom: "15px", fontWeight: "bold" }}>Promociones aplicables al pedido</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", maxWidth: "100%" }}>
                     {carrito.filter(item => item.promocionAplicada && !item.esMitades).map((item) => (
-                      <div key={item.idUnique} style={{ backgroundColor: "#1A1A1A", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", maxWidth: "550px" }}>
+                      <div key={item.idUnique} style={{ backgroundColor: "#1A1A1A", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", maxWidth: "550px", flexWrap: isSmallScreen ? "wrap" : "nowrap" }}>
                         <span style={{ color: "#FFF", fontSize: "16px", padding: "10px 15px" }}>{item.promocionAplicada.nombre_promocion}</span>
-                        <span style={{ color: "#AAA", fontSize: "13px" }}>
+                        <span style={{ color: "#AAA", fontSize: "13px", padding: isSmallScreen ? "0 15px 10px" : "0" }}>
                           {item.promocionAplicada.tipo_descuento === "Porcentaje" ? `${item.promocionAplicada.valor}% ${item.nombreDisplay}` : `$${item.promocionAplicada.valor} ${item.nombreDisplay}`}
                         </span>
                         <span style={{ color: "#E53935", padding: "10px 15px", fontWeight: "bold", cursor: "pointer", fontSize: "16px" }}>x</span>
@@ -472,7 +479,7 @@ const [procesando, setProcesando] = useState(false);
                     })}
                   </div>
                   
-                  <div style={{ width: "100%", maxWidth: "550px", marginTop: "20px", display: "flex", justifyContent: "flex-end", alignItems: "flex-end", gap: "40px" }}>
+                  <div style={{ width: "100%", maxWidth: "550px", marginTop: "20px", display: "flex", justifyContent: isSmallScreen ? "space-between" : "flex-end", alignItems: "flex-end", gap: isSmallScreen ? "20px" : "40px", flexWrap: "wrap" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "15px", paddingBottom: "10px" }}>
                       <span style={{ fontSize: "16px", color: "#333" }}>Subtotal</span>
                       <span style={{ fontSize: "16px", color: "#333", fontWeight: "bold" }}>${subtotalBase.toFixed(0)}</span>
@@ -497,13 +504,13 @@ const [procesando, setProcesando] = useState(false);
               >
                 <ConfigProvider getPopupContainer={(triggerNode) => triggerNode.parentNode} theme={{ token: { borderRadius: 0, colorBgContainer: "#E0E0E0", colorBorder: "transparent", controlHeight: 40, fontSize: 16, colorText: "#333" }}}>
                   <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
-                    <div style={{ width: isMobile ? "100%" : "250px" }}>
+                    <div style={{ width: isMobile ? "100%" : "250px", flex: isTablet && !isMobile ? 1 : "none" }}>
                       <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>Tipo de producto</label>
                       <Select value={tipoProducto} onChange={setTipoProducto} style={{ width: "100%" }}>
                         {tiposUnicos.map(t => <Option key={t} value={t}>{t}</Option>)}
                       </Select>
                     </div>
-                    <div style={{ width: isMobile ? "100%" : "250px" }}>
+                    <div style={{ width: isMobile ? "100%" : "250px", flex: isTablet && !isMobile ? 1 : "none" }}>
                       <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>Tamaño</label>
                       <Select value={tamano} onChange={setTamano} style={{ width: "100%" }}>
                         {opcionesTamanosActuales.map(t => <Option key={t} value={t}>{t}</Option>)}
@@ -513,9 +520,9 @@ const [procesando, setProcesando] = useState(false);
 
                   <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                     {esPizza ? (
-                      <div style={{ position: "relative", minHeight: "450px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <div style={{ position: "relative", minHeight: pizzaContainerHeight, display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: isSmallScreen ? "60px" : "0" }}>
                         
-                        <div style={{ display: "flex", width: "100%", justifyContent: "center", marginBottom: "50px" }}>
+                        <div style={{ display: "flex", width: "100%", justifyContent: "center", marginBottom: isSmallScreen ? "20px" : "50px" }}>
                           <div style={{ textAlign: "center" }}>
                             <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "14px" }}>¿Mitades?</label>
                             <div style={{ display: "flex", borderRadius: "20px", overflow: "hidden", cursor: "pointer", width: "120px", border: "1px solid #CCC" }}>
@@ -525,39 +532,39 @@ const [procesando, setProcesando] = useState(false);
                           </div>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "30px", width: "100%", position: "relative" }}>
-                          <div style={{ position: "relative", zIndex: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: isTablet ? "10px" : "30px", width: "100%", position: "relative", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+                          <div style={{ position: "relative", zIndex: 10, marginBottom: isMobile ? "10px" : "0" }}>
                             <Select value={esMitades ? mitadIzquierdaId : pizzaCompletaId} onChange={(val) => esMitades ? setMitadIzquierdaId(val) : setPizzaCompletaId(val)} style={{ width: "160px" }}>
                               {opcionesPizzasFiltradas.map(p => <Option key={p.id_producto} value={p.id_producto}>{p.nombre.replace('Pizza ','')}</Option>)}
                             </Select>
-                            <div style={{ position: "absolute", top: "50%", right: "-50px", width: "50px", borderTop: "2px solid #333", transform: "rotate(15deg)", transformOrigin: "left" }} />
+                            {!isSmallScreen && <div style={{ position: "absolute", top: "50%", right: "-50px", width: "50px", borderTop: "2px solid #333", transform: "rotate(15deg)", transformOrigin: "left" }} />}
                           </div>
 
-                          <div style={{ position: "relative", width: "500px", height: "350px", display: "flex", justifyContent: "center", zIndex: 5 }}>
+                          <div style={{ position: "relative", width: pizzaImageSize, height: pizzaContainerHeight, display: "flex", justifyContent: "center", zIndex: 5, flexShrink: 0 }}>
                             <motion.img 
-                              key={`pizza-img-${pizzaCompletaId}-${tamano}`} // ANIMARÁ CUANDO CAMBIE PIZZA O TAMAÑO
+                              key={`pizza-img-${pizzaCompletaId}-${tamano}`} 
                               initial={{ rotate: -360, scale: 0 }}
                               animate={{ rotate: 0, scale: 1 }}
                               transition={{ type: "spring", stiffness: 150, damping: 20 }}
                               src={imagenPizza} 
                               alt="Pizza" 
-                              style={{ width: "500px", height: "500px", objectFit: "contain" }} 
+                              style={{ width: "100%", height: "100%", objectFit: "contain" }} 
                             />
-                            {esMitades && <div style={{ position: "absolute", top: "0%", bottom: "0%", left: "50%", borderLeft: "5px solid #000000", height: "500px" }} />}
+                            {esMitades && <div style={{ position: "absolute", top: "0%", bottom: "0%", left: "50%", borderLeft: "5px solid #000000", height: "100%" }} />}
                           </div>
 
                           {esMitades ? (
-                            <div style={{ position: "relative", zIndex: 10 }}>
+                            <div style={{ position: "relative", zIndex: 10, marginTop: isMobile ? "10px" : "0" }}>
                               <Select value={mitadDerechaId} onChange={setMitadDerechaId} style={{ width: "160px" }}>
                                 {opcionesPizzasFiltradas.map(p => <Option key={p.id_producto} value={p.id_producto}>{p.nombre.replace('Pizza ','')}</Option>)}
                               </Select>
-                              <div style={{ position: "absolute", top: "50%", left: "-50px", width: "50px", borderTop: "2px solid #333", transform: "rotate(-15deg)", transformOrigin: "right" }} />
+                              {!isSmallScreen && <div style={{ position: "absolute", top: "50%", left: "-50px", width: "50px", borderTop: "2px solid #333", transform: "rotate(-15deg)", transformOrigin: "right" }} />}
                             </div>
-                          ) : (<div style={{ width: "160px" }}></div>)}
+                          ) : (<div style={{ width: isMobile ? "0px" : "160px" }}></div>)}
                         </div>
 
-                        <div style={{ position: "absolute", right: isMobile ? "0" : "5%", bottom: "0" }}>
-                          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "14px" }}>Orilla de queso</label>
+                        <div style={{ position: "absolute", right: isMobile ? "50%" : "5%", bottom: "0", transform: isMobile ? "translateX(50%)" : "none" }}>
+                          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "14px", textAlign: isMobile ? "center" : "left" }}>Orilla de queso</label>
                           <div style={{ display: "flex", borderRadius: "20px", overflow: "hidden", cursor: "pointer", width: "120px" }}>
                             <div onClick={() => setOrillaQueso(false)} style={{ flex: 1, textAlign: "center", padding: "5px 0", fontWeight: "bold", backgroundColor: !orillaQueso ? "#888" : "#CCC", color: !orillaQueso ? "#FFF" : "#666" }}>No</div>
                             <div onClick={() => setOrillaQueso(true)} style={{ flex: 1, textAlign: "center", padding: "5px 0", fontWeight: "bold", backgroundColor: orillaQueso ? "#FBC02D" : "#CCC", color: orillaQueso ? "#000" : "#666" }}>Sí</div>
@@ -580,7 +587,7 @@ const [procesando, setProcesando] = useState(false);
                     <div style={{ marginTop: "auto", borderTop: "1px solid #CCC", paddingTop: "20px" }}>
                       <h3 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "15px" }}>Extras:</h3>
                       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-end" }}>
-                        <div style={{ width: "200px" }}>
+                        <div style={{ flex: "1 1 200px" }}>
                           <label style={{ display: "block", marginBottom: "5px", color: "#666", fontSize: "14px" }}>Ingrediente</label>
                           <Select 
                             value={extraInsumoId} 
@@ -598,7 +605,7 @@ const [procesando, setProcesando] = useState(false);
                           </Select>
                         </div>
                         
-                        <div style={{ width: "120px" }}>
+                        <div style={{ flex: "1 1 120px" }}>
                           <label style={{ display: "block", marginBottom: "5px", color: "#666", fontSize: "14px" }}>
                             Cantidad {unidadActual ? `(${unidadActual})` : ""}
                           </label>
@@ -611,8 +618,8 @@ const [procesando, setProcesando] = useState(false);
                           />
                         </div>
 
-                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Button onClick={handleAddExtra} style={{ backgroundColor: "#4A4A4A", color: "#FFF", borderRadius: "20px", border: "none", fontWeight: "bold", padding: "0 25px" }}>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: isSmallScreen ? "1 1 100%" : "none" }}>
+                          <Button onClick={handleAddExtra} style={{ backgroundColor: "#4A4A4A", color: "#FFF", borderRadius: "20px", border: "none", fontWeight: "bold", padding: "0 25px", width: isSmallScreen ? "100%" : "auto" }}>
                             Añadir insumo
                           </Button>
                         </motion.div>
@@ -636,9 +643,9 @@ const [procesando, setProcesando] = useState(false);
                         </AnimatePresence>
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Button onClick={handleAddProducto} style={{ borderRadius: "20px", border: "2px solid #333", color: "#333", fontWeight: "bold", padding: "0 30px" }}>
+                      <div style={{ display: "flex", justifyContent: isSmallScreen ? "center" : "flex-end", marginTop: "20px" }}>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ width: isSmallScreen ? "100%" : "auto" }}>
+                          <Button onClick={handleAddProducto} style={{ borderRadius: "20px", border: "2px solid #333", color: "#333", fontWeight: "bold", padding: "0 30px", width: isSmallScreen ? "100%" : "auto" }}>
                             Añadir producto
                           </Button>
                         </motion.div>
@@ -653,7 +660,7 @@ const [procesando, setProcesando] = useState(false);
         </div>
 
         {/* PANEL DERECHO COMPARTIDO (CARRITO) */}
-        <div style={{ flex: isMobile ? "none" : 1, width: isMobile ? "100%" : "350px", backgroundColor: "#2E2E2E", padding: "30px", display: "flex", flexDirection: "column", borderTop: isMobile ? "4px solid #1A1A1A" : "none" }}>
+        <div style={{ flex: isMobile ? "none" : "0 0 auto", width: isMobile ? "100%" : isTablet ? "300px" : "350px", backgroundColor: "#2E2E2E", padding: "30px", display: "flex", flexDirection: "column", borderTop: isMobile ? "4px solid #1A1A1A" : "none", transition: "width 0.3s ease" }}>
           <h3 style={{ color: "#FFF", fontSize: "22px", fontWeight: "bold", marginBottom: "30px" }}>Productos</h3>
           
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1, overflowY: "auto", overflowX: "hidden", paddingRight: "5px" }}>
@@ -676,19 +683,19 @@ const [procesando, setProcesando] = useState(false);
                     <div style={{ backgroundColor: "#EBEBEB", padding: "10px 15px", display: "flex", flexDirection: "column", alignItems: "flex-start", borderRadius: "8px" }}>
                       <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
                         <span style={{ color: "#333", fontWeight: "500", fontSize: "15px" }}>{item.nombreDisplay}</span>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                          <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", flexWrap: "wrap", marginTop: "5px" }}>
+                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
                             {item.promocionAplicada && !item.esMitades ? (
                               <>
                                 <span style={{ color: "#999", fontSize: "12px", textDecoration: "line-through" }}>${(item.precioBase + (item.costoOrilla || 0)).toFixed(2)}</span>
-                                <span style={{ color: "#5FB666", fontSize: "12px", fontWeight: "bold", marginLeft: "5px" }}>${item.precioCalculado.toFixed(2)}</span>
-                                <Tag color="green" style={{ marginLeft: "5px", fontSize: "10px" }}>{item.promocionAplicada.nombre_promocion}</Tag>
+                                <span style={{ color: "#5FB666", fontSize: "12px", fontWeight: "bold" }}>${item.precioCalculado.toFixed(2)}</span>
+                                <Tag color="green" style={{ margin: 0, fontSize: "10px" }}>{item.promocionAplicada.nombre_promocion}</Tag>
                               </>
                             ) : (
                               <span style={{ color: "#666", fontSize: "12px", fontWeight: "bold" }}>${item.precioCalculado.toFixed(2)} total</span>
                             )}
                           </div>
-                          <motion.span whileHover={{ scale: 1.2 }} onClick={() => handleRemoveCarrito(item.idUnique)} style={{ color: "#E53935", fontWeight: "bold", cursor: "pointer", fontSize: "16px", padding: "0 5px" }}>x</motion.span>
+                          <motion.span whileHover={{ scale: 1.2 }} onClick={() => handleRemoveCarrito(item.idUnique)} style={{ color: "#E53935", fontWeight: "bold", cursor: "pointer", fontSize: "16px", padding: "0 5px", marginLeft: "auto" }}>x</motion.span>
                         </div>
                       </div>
                     </div>
@@ -701,23 +708,23 @@ const [procesando, setProcesando] = useState(false);
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             {mostrarResumen ? (
               <Button 
-  onClick={handleFinalizar} 
-  size="large" 
-  loading={procesando} 
-  disabled={procesando} 
-  style={{ 
-    marginTop: "20px", 
-    backgroundColor: procesando ? "#CCC" : "transparent", 
-    borderColor: "#F5A623", 
-    color: "#F5A623", 
-    fontWeight: "bold", 
-    borderRadius: "20px", 
-    borderWidth: "2px", 
-    width: "100%" 
-  }}
->
-  Finalizar
-</Button>
+                onClick={handleFinalizar} 
+                size="large" 
+                loading={procesando} 
+                disabled={procesando} 
+                style={{ 
+                  marginTop: "20px", 
+                  backgroundColor: procesando ? "#CCC" : "transparent", 
+                  borderColor: "#F5A623", 
+                  color: "#F5A623", 
+                  fontWeight: "bold", 
+                  borderRadius: "20px", 
+                  borderWidth: "2px", 
+                  width: "100%" 
+                }}
+              >
+                Finalizar
+              </Button>
             ) : (
               <Button 
                 onClick={handleMostrarResumen} 

@@ -75,6 +75,14 @@ const [editCantidadInsumo, setEditCantidadInsumo] = useState('');
 const [editRecetaInsumos, setEditRecetaInsumos] = useState([]);
 const [editProductoId, setEditProductoId] = useState(null);
 
+
+const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
+    
   // Obtener todos los productos
   const getProductos = async () => {
     setLoading(true);

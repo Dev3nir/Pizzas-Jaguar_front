@@ -19,7 +19,7 @@ const InicioAdmin = () => {
     const [ventasHoy, setVentasHoy] = useState(0);
     const [ventasMes, setVentasMes] = useState(0);
     const [productovendido, setProductosAgotados] = useState("Cargando...");
-
+    const [token, setToken] = useState(localStorage.getItem("token") || null);
     // ========================================================
     // ESTADOS PARA EL CONTROL DE LA CAJA
     // ========================================================
@@ -30,6 +30,12 @@ const InicioAdmin = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [successData, setSuccessData] = useState({ title: "", text: "" });
     const [montoInput, setMontoInput] = useState("");
+    //usseffect para si no hay token navigate a /
+    useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
     // ======
     const fetchData = async () => {
         try {
@@ -76,7 +82,11 @@ const InicioAdmin = () => {
         }
         try {
             setLoadingCaja(true);
-            await axios.post(`${API_URL}/caja/abrir`, { montoInicial: parseFloat(montoInput) });
+            await axios.post(`${API_URL}/caja/abrir`, { montoInicial: parseFloat(montoInput) },{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setModalType(null);
             setSuccessData({
                 title: "¡Registro exitoso!",
@@ -109,7 +119,11 @@ const InicioAdmin = () => {
         }
         try {
             setLoadingCaja(true);
-            await axios.put(`${API_URL}/caja/cerrar`, { montoFinal: parseFloat(montoInput) });
+            await axios.put(`${API_URL}/caja/cerrar`, { montoFinal: parseFloat(montoInput) },{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setModalType(null);
             setSuccessData({
                 title: "¡Registro exitoso!",

@@ -49,7 +49,12 @@ const Inventario = () => {
 
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(false);
-
+const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
   // MODAL
   const [isModalOpen, setIsModalOpen] = useState(false);
 

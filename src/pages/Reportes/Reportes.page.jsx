@@ -43,6 +43,14 @@ const ReportesPage = () => {
   const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+useEffect(() => {
+        if (!token) {
+            window.location.href = "/";
+        }
+    }, [token]);
+    
   const obtenerTituloReporte = () => {
     switch (tipoReporte) {
       case "ventas": return "Reporte de Ventas";
